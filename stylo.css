@@ -1,0 +1,200 @@
+/* =========================================================
+   Simulador de Parquímetro
+   Ideia: uma placa de "Zona Azul" em cima de um parquímetro
+   de metal, com o resultado num visor LCD verde.
+   ========================================================= */
+ 
+/* Fontes: Overpass é baseada na letra das placas de rodovia;
+   VT323 imita o visor digital de máquina. */
+@import url("https://fonts.googleapis.com/css2?family=Overpass:wght@400;700;900&family=VT323&display=swap");
+ 
+/* ---------- Cores e medidas usadas em todo o arquivo ---------- */
+:root {
+    --asfalto: #3a3f44;       /* fundo da página */
+    --faixa: #f2c230;         /* amarelo de faixa de rua */
+    --placa: #1f4e9c;         /* azul da placa Zona Azul */
+    --metal-claro: #c9ced3;   /* corpo do parquímetro */
+    --metal-escuro: #8e959c;
+    --lcd: #a8bf8f;           /* fundo do visor */
+    --lcd-texto: #1e2a18;     /* números do visor */
+    --branco: #ffffff;
+}
+ 
+/* ---------- Página ---------- */
+* {
+    box-sizing: border-box;
+}
+ 
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    font-family: "Overpass", Arial, sans-serif;
+    color: var(--lcd-texto);
+    background-color: var(--asfalto);
+    /* faixa amarela pontilhada no chão, como vaga de estacionamento */
+    background-image: repeating-linear-gradient(
+        90deg,
+        var(--faixa) 0 40px,
+        transparent 40px 70px
+    );
+    background-size: 100% 6px;
+    background-repeat: no-repeat;
+    background-position: bottom 3rem left;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+ 
+/* ---------- Placa (header) ---------- */
+header {
+    width: 100%;
+    max-width: 380px;
+    background: var(--placa);
+    border-radius: 12px;
+    padding: 6px;                       /* espaço até o filete branco */
+}
+ 
+header h1 {
+    margin: 0;
+    padding: 1rem;
+    border: 3px solid var(--branco);    /* filete branco de placa de trânsito */
+    border-radius: 8px;
+    color: var(--branco);
+    font-weight: 900;
+    font-size: 1.6rem;
+    line-height: 1.1;
+    text-align: center;
+}
+ 
+/* ---------- Corpo do parquímetro (main) ---------- */
+main {
+    width: 100%;
+    max-width: 380px;
+    margin-top: 1.25rem;
+    padding: 1.5rem;
+    border-radius: 18px 18px 6px 6px;
+    background: linear-gradient(160deg, var(--metal-claro), var(--metal-escuro));
+    border: 2px solid #6f767c;
+    box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.6),   /* brilho no topo do metal */
+        0 12px 24px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+ 
+main section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+ 
+/* ---------- Entrada do valor ---------- */
+label {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+ 
+input#valor {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-family: inherit;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--lcd-texto);
+    background: #eef0f2;
+    border: 2px solid #5c6368;
+    border-radius: 8px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);  /* parece encaixado no metal */
+}
+ 
+input#valor::placeholder {
+    font-weight: 400;
+    font-size: 1rem;
+    color: #7a8187;
+}
+ 
+/* ---------- Botão ---------- */
+button#calcular {
+    padding: 0.85rem;
+    font-family: inherit;
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: var(--lcd-texto);
+    background: var(--faixa);
+    border: 2px solid #b8901c;
+    border-radius: 8px;
+    cursor: pointer;
+    /* "degrau" embaixo: parece um botão físico */
+    box-shadow: 0 5px 0 #b8901c;
+    transition: transform 0.08s, box-shadow 0.08s;
+}
+ 
+button#calcular:hover {
+    background: #f7cf4c;
+}
+ 
+/* ao clicar, o botão "afunda" */
+button#calcular:active {
+    transform: translateY(5px);
+    box-shadow: 0 0 0 #b8901c;
+}
+ 
+/* ---------- Visor de resultado ---------- */
+main h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+ 
+#resultado {
+    min-height: 5.5rem;
+    padding: 0.9rem 1rem;
+    font-family: "VT323", "Courier New", monospace;
+    font-size: 1.6rem;
+    line-height: 1.2;
+    color: var(--lcd-texto);
+    background: var(--lcd);
+    border: 4px solid #2a2e31;          /* moldura escura do visor */
+    border-radius: 6px;
+    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.35);
+    overflow-wrap: anywhere;
+}
+ 
+/* enquanto não tem resultado, mostra "--:--" apagadinho */
+#resultado:empty::before {
+    content: "--:--";
+    opacity: 0.35;
+}
+ 
+/* ---------- Acessibilidade ---------- */
+/* contorno bem visível para quem navega pelo teclado (Tab) */
+input#valor:focus-visible,
+button#calcular:focus-visible {
+    outline: 3px solid var(--placa);
+    outline-offset: 3px;
+}
+ 
+/* quem pediu menos animação no sistema não vê o botão afundar */
+@media (prefers-reduced-motion: reduce) {
+    button#calcular {
+        transition: none;
+    }
+}
+ 
+/* ---------- Celular ---------- */
+@media (max-width: 420px) {
+    body {
+        padding: 1rem 0.75rem;
+    }
+ 
+    header h1 {
+        font-size: 1.35rem;
+    }
+ 
+    main {
+        padding: 1.1rem;
+    }
+}
+ 
